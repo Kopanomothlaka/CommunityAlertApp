@@ -20,17 +20,27 @@ export default function App() {
     }, 2000);
   }, []);
 
-  // Splash Screen
-  if (isLoading) {
-    return (
-      <Animated.View style={[styles.splashContainer, { opacity: fadeAnim }]}>
-        <View style={styles.logoContainer}>
-          <MaterialIcons name="grid-view" size={60} color="#2246E6" />
-        </View>
-        <StatusBar style="auto" />
-      </Animated.View>
-    );
-  }
+ // Splash Screen
+if (isLoading) {
+  return (
+    <Animated.View style={[styles.splashContainer, { opacity: fadeAnim }]}>
+      <View style={styles.logoContainer}>
+        {/* Existing icon */}
+        
+        {/* Add your image (make sure to import Image from 'react-native') */}
+        <Image 
+          source={require('./assets/icon.png')} // or {uri: 'https://...'} for remote images
+          style={styles.splashImage}
+          resizeMode="contain"
+        />
+        
+        {/* Add text */}
+        <Text style={styles.splashText}>Community Alert</Text>
+      </View>
+      <StatusBar style="auto" />
+    </Animated.View>
+  );
+}
 
   // Main App Screen
   return (
@@ -104,6 +114,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  splashImage: {
+    width: 90,  // adjust as needed
+    height: 90, // adjust as needed
+    marginVertical: 20,
+  },
+  splashText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2246E6',
+    marginTop: 10,
   },
   logoContainer: {
     alignItems: 'center',
