@@ -98,8 +98,41 @@ const MenuItem = ({ icon, label, onPress }) => (
 );
 
 // Placeholder Screens
-const AlertScreen = () => <GenericScreen title="Alert Screen" />;
+const AlertScreen = ({ navigation }) => (
+  <SafeAreaView style={styles.alertContainer}>
+    {/* Sticky Search Bar */}
+    <View style={styles.stickySearchContainer}>
+      <View style={styles.searchContainer}>
+        <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
+        <Text style={styles.searchPlaceholder}>search here</Text>
+      </View>
+    </View>
 
+    {/* Scrollable Content */}
+    <ScrollView 
+      contentContainerStyle={styles.scrollContent}
+      stickyHeaderIndices={[0]} // Optional for iOS
+    >
+      {/* Alert List */}
+      <Text style={styles.alertListTitle}></Text>
+      
+      {[1, 2, 3,4,5,6].map((item, index) => (
+        <View key={index} style={styles.alertItem}>
+          <Text style={styles.alertType}>Water</Text>
+          <Text style={styles.alertStatus}>active</Text>
+          <Text style={styles.alertLocation}>Baster, Nkgoru</Text>
+          <Text style={styles.alertDates}>12/03/2025 - 13/03/2025</Text>
+        </View>
+      ))}
+
+      {/* Footer */}
+      <View style={styles.alertFooter}>
+        <Text style={styles.footerText}>Managed by</Text>
+        <Text style={styles.footerCompany}>KayTech</Text>
+      </View>
+    </ScrollView>
+  </SafeAreaView>
+);
 
 
 const MeetingsScreen = () => <GenericScreen title="Meetings Screen" />;
@@ -220,4 +253,78 @@ const styles = StyleSheet.create({
     color: '#2246E6',
     textAlign: 'center',
   },
+  alertContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+    padding:15,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding:50,
+    backgroundColor: '#f1f1f1',
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    margin : 15,
+    marginVertical: 20,
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchPlaceholder: {
+    color: '#888',
+    fontSize: 16,
+    
+  },
+  alertListTitle: {
+    fontSize: 1,
+    fontWeight: 'bold',
+    color: '#333',
+    
+
+  },
+  alertItem: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    paddingVertical: 24,  // Top-bottom padding
+    paddingHorizontal: 18, // Left-right padding
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+    margin : 15,
+
+  },
+  alertType: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2246E6',
+    marginBottom: 5,
+  },
+  alertStatus: {
+    fontSize: 14,
+    color: '#4CAF50',
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  alertLocation: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 5,
+  },
+  alertDates: {
+    fontSize: 14,
+    color: '#666',
+  },
+  alertFooter: {
+    marginTop: 120,
+    alignItems: 'center',
+    paddingBottom: 20,
+  },
+  
+  
 });
