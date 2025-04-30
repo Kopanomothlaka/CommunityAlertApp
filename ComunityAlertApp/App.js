@@ -152,41 +152,46 @@ const AlertScreen = ({ navigation }) => {
         ) : (
           alerts.map(alert => (
             <View key={alert.id} style={styles.alertItem}>
-  <View style={styles.alertHeader}>
+  {/* Header Row */}
+  <View style={styles.headerContainer}>
     <MaterialCommunityIcons name="alert-circle" size={20} color="#FF6B6B" />
-    <Text style={styles.alertType}>{alert.alert_name}</Text>
+    <Text style={styles.alertTitle}>{alert.alert_name}</Text>
   </View>
 
-  <View style={styles.statusContainer}>
+  {/* Status Row */}
+  <View style={[styles.row, styles.statusContainer]}>
     <MaterialCommunityIcons 
       name={alert.status === 'active' ? 'check-circle' : 'close-circle'}
-      size={16}
+      size={18}
       color={alert.status === 'active' ? '#4CAF50' : '#FF5722'}
     />
     <Text style={[
-      styles.alertStatus,
+      styles.statusText,
       { color: alert.status === 'active' ? '#4CAF50' : '#FF5722' }
     ]}>
-      {alert.status}
+      {alert.status.toUpperCase()}
     </Text>
   </View>
 
-  <View style={styles.detailRow}>
-    <MaterialCommunityIcons name="map-marker" size={16} color="#666" />
-    <Text style={styles.alertLocation}>{alert.location}</Text>
+  {/* Location Row */}
+  <View style={styles.row}>
+    <MaterialCommunityIcons name="map-marker" size={16} color="#666" style={styles.icon} />
+    <Text style={styles.detailText}>{alert.location}</Text>
   </View>
 
-  <View style={styles.detailRow}>
-    <Ionicons name="calendar" size={16} color="#666" />
-    <Text style={styles.alertDates}>
+  {/* Dates Row */}
+  <View style={styles.row}>
+    <Ionicons name="calendar" size={16} color="#666" style={styles.icon} />
+    <Text style={styles.detailText}>
       {new Date(alert.start_datetime).toLocaleDateString()} -{' '}
       {new Date(alert.end_datetime).toLocaleDateString()}
     </Text>
   </View>
 
-  <View style={styles.detailRow}>
-    <MaterialCommunityIcons name="information-outline" size={16} color="#666" />
-    <Text style={styles.alertDescription}>{alert.description}</Text>
+  {/* Description Row */}
+  <View style={styles.row}>
+    <MaterialCommunityIcons name="information-outline" size={16} color="#666" style={styles.icon} />
+    <Text style={styles.descriptionText}>{alert.description}</Text>
   </View>
 </View>
           ))
@@ -416,6 +421,57 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 8,
+  },
+  alertItem: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    marginVertical: 8,
+    elevation: 2,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    paddingBottom: 8,
+  },
+  alertTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    marginLeft: 10,
+    color: '#333',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginVertical: 6,
+  },
+  statusContainer: {
+    marginBottom: 8,
+    alignItems: 'center',
+  },
+  statusText: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginLeft: 8,
+  },
+  icon: {
+    width: 24,  // Fixed width for icon alignment
+    marginTop: 2,  // Optical alignment adjustment
+  },
+  detailText: {
+    fontSize: 14,
+    color: '#666',
+    flex: 1,
+    lineHeight: 20,
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: '#444',
+    lineHeight: 20,
+    flex: 1,
   },
   
   
