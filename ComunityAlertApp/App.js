@@ -97,42 +97,110 @@ const MenuItem = ({ icon, label, onPress }) => (
   </TouchableOpacity>
 );
 
-// Placeholder Screens
-const AlertScreen = ({ navigation }) => (
-  <SafeAreaView style={styles.alertContainer}>
-    {/* Sticky Search Bar */}
-    <View style={styles.stickySearchContainer}>
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
-        <Text style={styles.searchPlaceholder}>search here</Text>
-      </View>
-    </View>
+// Alert Screen with API integration
+const AlertScreen = ({ navigation }) => {
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); 
 
-    {/* Scrollable Content */}
-    <ScrollView 
-      contentContainerStyle={styles.scrollContent}
-      stickyHeaderIndices={[0]} // Optional for iOS
-    >
-      {/* Alert List */}
-      <Text style={styles.alertListTitle}></Text>
-      
-      {[1, 2, 3,4,5,6].map((item, index) => (
-        <View key={index} style={styles.alertItem}>
-          <Text style={styles.alertType}>Water</Text>
-          <Text style={styles.alertStatus}>active</Text>
-          <Text style={styles.alertLocation}>Baster, Nkgoru</Text>
-          <Text style={styles.alertDates}>12/03/2025 - 13/03/2025</Text>
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const response = await fetch('http://192.168.1.5:8000/api/alerts');
+        if (!response.ok) throw new Error('Failed to fetch alerts');
+        const data = await response.json();
+        setAlerts(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAlerts();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading alerts...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.alertContainer}>
+      {/* Search Bar remains same */}
+      <View style={styles.stickySearchContainer}>
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
+          <Text style={styles.searchPlaceholder}>Search here</Text>
         </View>
-      ))}
-
-      {/* Footer */}
-      <View style={styles.alertFooter}>
-        <Text style={styles.footerText}>Managed by</Text>
-        <Text style={styles.footerCompany}>KayTech</Text>
       </View>
-    </ScrollView>
-  </SafeAreaView>
-);
+
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {alerts.length === 0 ? (
+          <Text style={styles.noAlertsText}>No current alerts</Text>
+        ) : (
+          alerts.map(alert => (
+            <View key={alert.id} style={styles.alertItem}>
+  <View style={styles.alertHeader}>
+    <MaterialCommunityIcons name="alert-circle" size={20} color="#FF6B6B" />
+    <Text style={styles.alertType}>{alert.alert_name}</Text>
+  </View>
+
+  <View style={styles.statusContainer}>
+    <MaterialCommunityIcons 
+      name={alert.status === 'active' ? 'check-circle' : 'close-circle'}
+      size={16}
+      color={alert.status === 'active' ? '#4CAF50' : '#FF5722'}
+    />
+    <Text style={[
+      styles.alertStatus,
+      { color: alert.status === 'active' ? '#4CAF50' : '#FF5722' }
+    ]}>
+      {alert.status}
+    </Text>
+  </View>
+
+  <View style={styles.detailRow}>
+    <MaterialCommunityIcons name="map-marker" size={16} color="#666" />
+    <Text style={styles.alertLocation}>{alert.location}</Text>
+  </View>
+
+  <View style={styles.detailRow}>
+    <Ionicons name="calendar" size={16} color="#666" />
+    <Text style={styles.alertDates}>
+      {new Date(alert.start_datetime).toLocaleDateString()} -{' '}
+      {new Date(alert.end_datetime).toLocaleDateString()}
+    </Text>
+  </View>
+
+  <View style={styles.detailRow}>
+    <MaterialCommunityIcons name="information-outline" size={16} color="#666" />
+    <Text style={styles.alertDescription}>{alert.description}</Text>
+  </View>
+</View>
+          ))
+        )}
+
+        <View style={styles.alertFooter}>
+          <Text style={styles.footerText}>Managed by</Text>
+          <Text style={styles.footerCompany}>KayTech</Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
 
 
 const MeetingsScreen = () => <GenericScreen title="Meetings Screen" />;
@@ -324,6 +392,30 @@ const styles = StyleSheet.create({
     marginTop: 120,
     alignItems: 'center',
     paddingBottom: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  noAlertsText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  alertDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 8,
   },
   
   
