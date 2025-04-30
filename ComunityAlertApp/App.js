@@ -651,6 +651,24 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontStyle: 'italic',
   },
+  meetingItem: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    margin: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 4,
+    // Shadow for Android
+    elevation: 6,
+    // Border for better visual separation
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
   
   
 });
