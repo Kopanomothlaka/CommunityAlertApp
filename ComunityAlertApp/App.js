@@ -198,7 +198,166 @@ const AlertScreen = ({ navigation }) => {
 
 
 
-const MeetingsScreen = () => <GenericScreen title="Meetings Screen" />;
+const MeetingsScreen = ({ navigation }) => {
+  const [meetings, setMeetings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchMeetings = async () => {
+      try {
+        const response = await fetch('http://192.168.1.5:8000/api/meetings');
+        if (!response.ok) throw new Error('Failed to fetch meetings');
+        const data = await response.json();
+        setMeetings(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMeetings();
+  }, []);
+
+  const getStatusDetails = (status) => {
+    switch (status.toLowerCase()) {
+      case 'scheduled':
+        return { icon: 'calendar-clock', color: '#2D6A9F' };
+      case 'cancelled':
+        return { icon: 'close-circle', color: '#FF5722' };
+      case 'in-progress':
+        return { icon: 'progress-check', color: '#FFC107' };
+      case 'completed':
+        return { icon: 'check-circle', color: '#4CAF50' };
+      default:
+        return { icon: 'calendar', color: '#666' };
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading meetings...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {meetings.length === 0 ? (
+          <Text style={styles.noMeetingsText}>No upcoming meetings</Text>
+        ) : (
+          meetings.map(meeting => {
+            const statusDetails = getStatusDetails(meeting.status);
+            
+            return (
+              <View key={meeting.id} style={styles.meetingItem}>
+                {/* Header Row */}
+                <View style={styles.headerContainer}>
+                  <MaterialCommunityIcons 
+                    name="calendar-text" 
+                    size={22} 
+                    color={statusDetails.color} 
+                  />
+                  <Text style={styles.meetingTitle}>{meeting.title}</Text>
+                </View>
+
+                {/* Status Row */}
+                <View style={styles.row}>
+                  <MaterialCommunityIcons 
+                    name={statusDetails.icon}
+                    size={18}
+                    color={statusDetails.color}
+                    style={styles.icon}
+                  />
+                  <Text style={[styles.statusText, { color: statusDetails.color }]}>
+                    {meeting.status.toUpperCase()}
+                  </Text>
+                </View>
+
+                {/* Time Row */}
+                <View style={styles.row}>
+                  <MaterialCommunityIcons name="clock" size={16} color="#666" style={styles.icon} />
+                  <Text style={styles.detailText}>
+                    {new Date(meeting.start_time).toLocaleString()} - {' '}
+                    {new Date(meeting.end_time).toLocaleString()}
+                  </Text>
+                </View>
+
+                {/* Location Row */}
+                <View style={styles.row}>
+                  <Ionicons name="location" size={16} color="#666" style={styles.icon} />
+                  <Text 
+                    style={[styles.detailText, meeting.location.startsWith('http') && styles.linkText]}
+                    onPress={() => meeting.location.startsWith('http') && Linking.openURL(meeting.location)}
+                  >
+                    {meeting.location}
+                  </Text>
+                </View>
+
+                {/* Attendees Row */}
+                {meeting.attendees?.length > 0 && (
+                  <View style={styles.row}>
+                    <Ionicons name="people" size={16} color="#666" style={styles.icon} />
+                    <View style={styles.attendeesContainer}>
+                      <Text style={styles.detailText}>
+                        {meeting.attendees.join(', ')}
+                      </Text>
+                      <Text style={styles.attendeesCount}>
+                        ({meeting.attendees.length} participants)
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                {/* Agenda Row */}
+                {meeting.agenda && (
+                  <View style={styles.row}>
+                    <MaterialCommunityIcons 
+                      name="text-subject" 
+                      size={16} 
+                      color="#666" 
+                      style={styles.icon} 
+                    />
+                    <Text style={styles.detailText}>{meeting.agenda}</Text>
+                  </View>
+                )}
+
+                {/* Description Row */}
+                {meeting.description && (
+                  <View style={styles.row}>
+                    <MaterialCommunityIcons 
+                      name="text" 
+                      size={16} 
+                      color="#666" 
+                      style={styles.icon} 
+                    />
+                    <Text style={styles.descriptionText}>{meeting.description}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+          )
+        )}
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Calendar powered by</Text>
+          <Text style={styles.footerCompany}>KayTech</Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
 const JobsScreen = () => <GenericScreen title="Jobs Screen" />;
 const ReportScreen = () => <GenericScreen title="Report Screen" />;
 const HelpScreen = () => <GenericScreen title="Help Screen" />;
@@ -468,6 +627,29 @@ const styles = StyleSheet.create({
     color: '#444',
     lineHeight: 20,
     flex: 1,
+  },
+  statusText: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginLeft: 4,
+  },
+  linkText: {
+    color: '#2D6A9F',
+    textDecorationLine: 'underline',
+  },
+  attendeesContainer: {
+    flexDirection: 'column',
+  },
+  attendeesCount: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 2,
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: '#444',
+    lineHeight: 20,
+    fontStyle: 'italic',
   },
   
   
