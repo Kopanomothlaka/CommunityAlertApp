@@ -358,7 +358,148 @@ const MeetingsScreen = ({ navigation }) => {
     </SafeAreaView>
   );
 };
-const JobsScreen = () => <GenericScreen title="Jobs Screen" />;
+const JobsScreen = ({ navigation }) => {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const formatSalary = (min, max) => {
+    return `R${Number(min).toLocaleString()} - R${Number(max).toLocaleString()}`;
+  };
+
+  const getStatusDetails = (status) => {
+    switch (status.toLowerCase()) {
+      case 'open':
+        return { icon: 'lock-open-variant', color: '#4CAF50' };
+      case 'closed':
+        return { icon: 'lock', color: '#F44336' };
+      case 'draft':
+        return { icon: 'pencil', color: '#FFC107' };
+      default:
+        return { icon: 'briefcase', color: '#666' };
+    }
+  };
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const response = await fetch('http://192.168.1.5:8000/api/jobs');
+        if (!response.ok) throw new Error('Failed to fetch jobs');
+        const data = await response.json();
+        setJobs(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading jobs...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {jobs.length === 0 ? (
+          <Text style={styles.noJobsText}>No available positions</Text>
+        ) : (
+          jobs.map(job => {
+            const statusDetails = getStatusDetails(job.status);
+            const deadlineDate = new Date(job.deadline);
+            
+            return (
+              <View key={job.id} style={styles.jobCard}>
+                {/* Status Ribbon */}
+                <View style={[styles.statusRibbon, { backgroundColor: statusDetails.color }]}>
+                  <Text style={styles.statusRibbonText}>{job.status.toUpperCase()}</Text>
+                </View>
+
+                {/* Main Content */}
+                <View style={styles.cardContent}>
+                  {/* Title and Company */}
+                  <View style={styles.headerContainer}>
+                    <MaterialCommunityIcons 
+                      name="briefcase" 
+                      size={24} 
+                      color="#2D6A9F" 
+                    />
+                    <View style={styles.titleContainer}>
+                      <Text style={styles.jobTitle}>{job.title}</Text>
+                      <Text style={styles.companyName}>{job.company}</Text>
+                    </View>
+                  </View>
+
+                  {/* Location and Type */}
+                  <View style={styles.detailsRow}>
+                    <View style={styles.detailItem}>
+                      <Ionicons name="location" size={16} color="#666" />
+                      <Text style={styles.detailText}>{job.location}</Text>
+                    </View>
+                    <View style={styles.detailItem}>
+                      <MaterialCommunityIcons name="clock" size={16} color="#666" />
+                      <Text style={styles.detailText}>{job.job_type}</Text>
+                    </View>
+                  </View>
+
+                  {/* Salary and Category */}
+                  <View style={styles.detailsRow}>
+                    <View style={styles.detailItem}>
+                      <MaterialCommunityIcons name="cash" size={16} color="#666" />
+                      <Text style={styles.detailText}>
+                        {formatSalary(job.min_salary, job.max_salary)}
+                      </Text>
+                    </View>
+                    <View style={styles.detailItem}>
+                      <MaterialCommunityIcons name="tag" size={16} color="#666" />
+                      <Text style={styles.detailText}>{job.category}</Text>
+                    </View>
+                  </View>
+
+                  {/* Deadline */}
+                  <View style={styles.deadlineContainer}>
+                    <MaterialCommunityIcons name="calendar-alert" size={16} color="#666" />
+                    <Text style={styles.deadlineText}>
+                      Apply by: {deadlineDate.toLocaleDateString()} •{' '}
+                      {deadlineDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </Text>
+                  </View>
+
+                  {/* Description */}
+                  {job.description && (
+                    <View style={styles.descriptionContainer}>
+                      <Text style={styles.descriptionText}>{job.description}</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            )}
+          )
+        )}
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Opportunities powered by</Text>
+          <Text style={styles.footerCompany}>KayTech</Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
 const ReportScreen = () => <GenericScreen title="Report Screen" />;
 const HelpScreen = () => <GenericScreen title="Help Screen" />;
 const ContactScreen = () => <GenericScreen title="Contact Screen" />;
@@ -668,6 +809,136 @@ const styles = StyleSheet.create({
     // Border for better visual separation
     borderWidth: 1,
     borderColor: '#F0F0F0',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F7FA',
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 40,
+  },
+  jobCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#EEE',
+  },
+  statusRibbon: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    borderTopRightRadius: 12,
+    borderBottomLeftRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  statusRibbonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  cardContent: {
+    position: 'relative',
+    zIndex: 1,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  titleContainer: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  jobTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2A2A2A',
+  },
+  companyName: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+  detailsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 8,
+  },
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 10,
+  },
+  detailText: {
+    fontSize: 14,
+    color: '#444',
+    marginLeft: 6,
+  },
+  deadlineContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#EEE',
+  },
+  deadlineText: {
+    fontSize: 14,
+    color: '#F44336',
+    marginLeft: 8,
+    fontWeight: '500',
+  },
+  descriptionContainer: {
+    marginTop: 12,
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: '#444',
+    lineHeight: 20,
+  },
+  noJobsText: {
+    textAlign: 'center',
+    color: '#888',
+    fontSize: 16,
+    marginTop: 20,
+  },
+  footer: {
+    marginTop: 24,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#EEE',
+    paddingTop: 16,
+  },
+  footerText: {
+    color: '#888',
+    fontSize: 12,
+  },
+  footerCompany: {
+    color: '#2D6A9F',
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 4,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFEBEE',
   },
   
   
