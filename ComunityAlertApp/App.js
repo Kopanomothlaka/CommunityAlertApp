@@ -138,13 +138,7 @@ const AlertScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.alertContainer}>
-      {/* Search Bar remains same */}
-      <View style={styles.stickySearchContainer}>
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
-          <Text style={styles.searchPlaceholder}>Search here</Text>
-        </View>
-      </View>
+      
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {alerts.length === 0 ? (
@@ -188,11 +182,7 @@ const AlertScreen = ({ navigation }) => {
     </Text>
   </View>
 
-  {/* Description Row */}
-  <View style={styles.row}>
-    <MaterialCommunityIcons name="information-outline" size={16} color="#666" style={styles.icon} />
-    <Text style={styles.descriptionText}>{alert.description}</Text>
-  </View>
+ 
 </View>
           ))
         )}
@@ -352,7 +342,7 @@ const styles = StyleSheet.create({
     
   },
   alertListTitle: {
-    fontSize: 1,
+    fontSize: 2,
     fontWeight: 'bold',
     color: '#333',
     
@@ -428,6 +418,12 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+    margin : 15,
   },
   headerContainer: {
     flexDirection: 'row',
