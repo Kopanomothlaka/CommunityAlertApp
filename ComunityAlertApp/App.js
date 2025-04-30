@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Animated, Image, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, Animated, Image, TouchableOpacity, SafeAreaView, ScrollView ,Linking} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -359,6 +359,32 @@ const MeetingsScreen = ({ navigation }) => {
   );
 };
 const JobsScreen = ({ navigation }) => {
+
+  // Add helper functions HERE, right after the useEffect
+  const parseDescription = (text) => {
+    const parts = text.split(/(https?:\/\/[^\s]+)/g);
+    return parts.map((part, index) => {
+      if (isUrl(part)) {
+        return (
+          <Text
+            key={index}
+            style={styles.linkText}
+            onPress={() => Linking.openURL(part)}
+          >
+            {part}
+          </Text>
+        );
+      }
+      return <Text key={index}>{part}</Text>;
+    });
+  };
+
+  const isUrl = (text) => {
+    return /^(https?:\/\/)/.test(text);
+  };
+
+
+
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -482,10 +508,13 @@ const JobsScreen = ({ navigation }) => {
 
                   {/* Description */}
                   {job.description && (
-                    <View style={styles.descriptionContainer}>
-                      <Text style={styles.descriptionText}>{job.description}</Text>
-                    </View>
-                  )}
+  <View style={styles.descriptionContainer}>
+    <Text style={styles.descriptionText}>
+      {parseDescription(job.description)}
+    </Text>
+  </View>
+)}
+
                 </View>
               </View>
             )}
@@ -939,6 +968,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#FFEBEE',
+  },
+  linkText: {
+    color: '#2D6A9F',
+    textDecorationLine: 'underline',
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: '#444',
+    lineHeight: 20,
+    flexWrap: 'wrap',
   },
   
   
