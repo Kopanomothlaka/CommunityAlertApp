@@ -3,7 +3,8 @@ import { StyleSheet, Text, View, Animated, Image, TouchableOpacity, SafeAreaView
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';  
+
 
 const Stack = createNativeStackNavigator();
 
@@ -106,7 +107,7 @@ const AlertScreen = ({ navigation }) => {
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const response = await fetch('http://192.168.1.5:8000/api/alerts');
+        const response = await fetch('http://192.168.1.4:8000/api/alerts');
         if (!response.ok) throw new Error('Failed to fetch alerts');
         const data = await response.json();
         setAlerts(data);
@@ -206,7 +207,7 @@ const MeetingsScreen = ({ navigation }) => {
   useEffect(() => {
     const fetchMeetings = async () => {
       try {
-        const response = await fetch('http://192.168.1.5:8000/api/meetings');
+        const response = await fetch('http://192.168.1.4:8000/api/meetings');
         if (!response.ok) throw new Error('Failed to fetch meetings');
         const data = await response.json();
         setMeetings(data);
@@ -409,7 +410,7 @@ const JobsScreen = ({ navigation }) => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await fetch('http://192.168.1.5:8000/api/jobs');
+        const response = await fetch('http://192.168.1.4:8000/api/jobs');
         if (!response.ok) throw new Error('Failed to fetch jobs');
         const data = await response.json();
         setJobs(data);
@@ -529,7 +530,93 @@ const JobsScreen = ({ navigation }) => {
     </SafeAreaView>
   );
 };
-const ReportScreen = () => <GenericScreen title="Report Screen" />;
+
+
+const ReportScreen = () => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleReport = async () => {
+    setIsLoading(true);
+    
+    try {
+      // Get current position
+      const position = await new Promise((resolve, reject) => {
+        Geolocation.getCurrentPosition(
+          resolve,
+          reject,
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        );
+      });
+
+      // Submit report to backend
+      const response = await fetch('http://192.168.1.4:8000/api/reports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          timestamp: new Date().toISOString()
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert('Success', 'Report submitted successfully! Admin will review it.');
+      } else {
+        throw new Error('Failed to submit report');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      Alert.alert('Error', error.message || 'Error submitting report. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.reportContainer}>
+          <MaterialCommunityIcons 
+            name="alert-outline" 
+            size={80} 
+            color="#2246E6" 
+            style={styles.reportIcon}
+          />
+          
+          <Text style={styles.reportTitle}>Submit Anonymous Report</Text>
+          <Text style={styles.reportText}>
+            Your current location will be automatically included with this report.
+            No personal information will be collected.
+          </Text>
+
+          <TouchableOpacity 
+            style={[styles.reportButton, isLoading && styles.disabledButton]}
+            onPress={handleReport}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <>
+                <MaterialCommunityIcons name="send" size={20} color="#fff" />
+                <Text style={styles.buttonText}>Submit Report</Text>
+              </>
+            )}
+          </TouchableOpacity>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Reporting powered by</Text>
+            <Text style={styles.footerCompany}>KayTech</Text>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+
 const HelpScreen = () => <GenericScreen title="Help Screen" />;
 const ContactScreen = () => <GenericScreen title="Contact Screen" />;
 
@@ -545,6 +632,48 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f7f9fc',
   },
+  reportContainer: {
+  flex: 1,
+  alignItems: 'center',
+  padding: 20,
+},
+reportIcon: {
+  marginTop: 30,
+  marginBottom: 20,
+},
+reportTitle: {
+  fontSize: 24,
+  fontWeight: 'bold',
+  color: '#2246E6',
+  textAlign: 'center',
+  marginBottom: 15,
+},
+reportText: {
+  fontSize: 16,
+  color: '#666',
+  textAlign: 'center',
+  marginBottom: 30,
+  lineHeight: 24,
+},
+reportButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: '#2246E6',
+  paddingVertical: 15,
+  paddingHorizontal: 30,
+  borderRadius: 25,
+  width: '100%',
+  gap: 10,
+},
+disabledButton: {
+  backgroundColor: '#6c757d',
+},
+buttonText: {
+  color: '#fff',
+  fontSize: 18,
+  fontWeight: '600',
+},
   scrollContent: {
     paddingBottom: 30,
   },
